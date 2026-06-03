@@ -1,14 +1,32 @@
 from django.contrib import messages
 from django.views import View
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect, render
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 
 LOGIN_URL = "login"
 TODOLIST_URL = "todolist"
 REGISTER_URL = "register"
+
+
+class EmailBackend(ModelBackend):
+    """Authenticate using email instead of username."""
+
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        email = kwargs.get("email", username)
+        if email is None or password is None:
+            return None
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return None
+        if user.check_password(password) and self.user_can_authenticate(user):
+            return user
+        return None
+
 
 class RegisterView(View):
 
@@ -25,33 +43,34 @@ class RegisterView(View):
 
     def post(self, request):
 
-        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip().lower()
         password = request.POST.get("password", "")
 
-        if not username or not password:
+        if not email or not password:
 
             messages.error(
                 request,
-                "Username and password are required."
+                "Email and password are required."
             )
 
             return redirect(REGISTER_URL)
 
-        if User.objects.filter(username__iexact=username).exists():
+        if User.objects.filter(email__iexact=email).exists():
 
             messages.error(
                 request,
-                "Username already exists."
+                "Email already registered."
             )
 
             return redirect(REGISTER_URL)
 
         user = User.objects.create_user(
-            username=username,
-            password=password
+            username=email,
+            email=email,
+            password=password,
         )
 
-        login(request, user)
+        login(request, user, backend="todolist.auth_views.EmailBackend")
 
         messages.success(
             request,
@@ -77,33 +96,33 @@ class LoginUserView(View):
 
     def post(self, request):
 
-        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip().lower()
         password = request.POST.get("password", "")
 
-        if not username or not password:
+        if not email or not password:
 
             messages.error(
                 request,
-                "Username and password are required."
+                "Email and password are required."
             )
 
             return redirect(LOGIN_URL)
 
         user = authenticate(
             request,
-            username=username,
-            password=password
+            email=email,
+            password=password,
         )
 
         if user is None:
 
             messages.error(
                 request,
-                "Invalid username or password."
+                "Invalid email or password."
             )
 
             return redirect(LOGIN_URL)
-        login(request, user)
+        login(request, user, backend="todolist.auth_views.EmailBackend")
         return redirect(TODOLIST_URL)
 
 

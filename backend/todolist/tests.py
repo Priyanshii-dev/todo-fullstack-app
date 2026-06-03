@@ -15,48 +15,50 @@ class AuthAPITests(TestCase):
         response = self.client.post(
             "/api/auth/register/",
             {
-                "username": "newuser",
+                "email": "newuser@example.com",
                 "password": "StrongPass123!",
             },
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(User.objects.filter(username="newuser").exists())
+        self.assertTrue(User.objects.filter(email="newuser@example.com").exists())
         self.assertTrue(response.data["success"])
         self.assertEqual(response.data["statusCode"], status.HTTP_201_CREATED)
         self.assertEqual(response.data["message"], "Registration successful")
         self.assertIn("token", response.data["data"])
-        self.assertEqual(response.data["data"]["user"]["username"], "newuser")
+        self.assertEqual(response.data["data"]["user"]["email"], "newuser@example.com")
 
-    def test_register_api_rejects_duplicate_username(self):
+    def test_register_api_rejects_duplicate_email(self):
         User.objects.create_user(
-            username="existing",
+            username="existing@example.com",
+            email="existing@example.com",
             password="StrongPass123!",
         )
 
         response = self.client.post(
             "/api/auth/register/",
             {
-                "username": "Existing",
+                "email": "Existing@example.com",
                 "password": "StrongPass123!",
             },
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("username", response.data)
+        self.assertIn("email", response.data)
 
     def test_login_api_returns_tokens_for_valid_credentials(self):
         User.objects.create_user(
-            username="activeuser",
+            username="activeuser@example.com",
+            email="activeuser@example.com",
             password="StrongPass123!",
         )
 
         response = self.client.post(
             "/api/auth/login/",
             {
-                "username": "activeuser",
+                "email": "activeuser@example.com",
                 "password": "StrongPass123!",
             },
             format="json",
@@ -67,13 +69,13 @@ class AuthAPITests(TestCase):
         self.assertEqual(response.data["statusCode"], status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "Login successful")
         self.assertIn("token", response.data["data"])
-        self.assertEqual(response.data["data"]["user"]["username"], "activeuser")
+        self.assertEqual(response.data["data"]["user"]["email"], "activeuser@example.com")
 
     def test_login_api_rejects_invalid_credentials(self):
         response = self.client.post(
             "/api/auth/login/",
             {
-                "username": "missing",
+                "email": "missing@example.com",
                 "password": "wrongpass",
             },
             format="json",
@@ -83,7 +85,7 @@ class AuthAPITests(TestCase):
         self.assertFalse(response.data["success"])
         self.assertEqual(
             response.data["message"],
-            "Invalid username or password.",
+            "Invalid email or password.",
         )
 
 
@@ -92,11 +94,13 @@ class TaskAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
-            username="taskuser",
+            username="taskuser@example.com",
+            email="taskuser@example.com",
             password="StrongPass123!",
         )
         self.other_user = User.objects.create_user(
-            username="otheruser",
+            username="otheruser@example.com",
+            email="otheruser@example.com",
             password="StrongPass123!",
         )
         self.client.force_authenticate(user=self.user)

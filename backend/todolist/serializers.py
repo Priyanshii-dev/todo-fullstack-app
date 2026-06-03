@@ -9,12 +9,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username"]
+        fields = ["id", "username", "email"]
 
 
 class TaskSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="user.id", read_only=True)
-    username = serializers.CharField(source="user.username", read_only=True)
+    email = serializers.EmailField(source="user.email", read_only=True)
 
     class Meta:
         model = Task
@@ -23,9 +23,9 @@ class TaskSerializer(serializers.ModelSerializer):
             "task",
             "is_completed",
             "user_id",
-            "username",
+            "email",
         ]
-        read_only_fields = ["user_id", "username"]
+        read_only_fields = ["user_id", "email"]
 
     def validate_task(self, value):
 
@@ -45,19 +45,20 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = User
-        fields = ["username", "password"]
+        fields = ["email", "password"]
 
-    def validate_username(self, value):
-        value = value.strip()
+    def validate_email(self, value):
+        value = value.strip().lower()
 
         if not value:
             raise serializers.ValidationError(
-                "Username is required."
+                "Email is required."
             )
 
+        # Check both username and email
         if User.objects.filter(username__iexact=value).exists():
             raise serializers.ValidationError(
-                "Username already exists."
+                "Email already registered."
             )
 
         return value
@@ -67,27 +68,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-
+        email = validated_data["email"]
         return User.objects.create_user(
-            username=validated_data["username"],
-            password=validated_data["password"]
+            username=email,
+            email=email,
+            password=validated_data["password"],
         )
 
 
 class LoginSerializer(serializers.Serializer):
-
-    username = serializers.CharField()
+    email = serializers.EmailField()
     password = serializers.CharField(
         write_only=True,
         trim_whitespace=False
     )
 
-    def validate_username(self, value):
-        value = value.strip()
-
+    def validate_email(self, value):
+        value = value.strip().lower()
         if not value:
             raise serializers.ValidationError(
-                "Username is required."
+                "Email is required."
             )
 
         return value

@@ -16,13 +16,13 @@ class LoginAPI(APIView):
 
         user = authenticate(
             request=request,
-            username=serializer.validated_data["username"],
+            email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
 
         if user is None:
             return error_response(
-                message="Invalid username or password.",
+                message="Invalid email or password.",
                 status_code=401,
             )
 
