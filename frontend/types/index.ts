@@ -6,6 +6,7 @@ export type TokenPair = {
 export type AuthUser = {
   id: number;
   username: string;
+  email: string;
 }
 
 export type AuthResponse = {

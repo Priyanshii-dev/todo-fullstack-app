@@ -21,7 +21,7 @@ export default function AuthForm({
     formState: { errors },
   } = useForm<AuthFormValues>({
     defaultValues: {
-      username: defaultValues?.username ?? "",
+      email: defaultValues?.email ?? "",
       password: defaultValues?.password ?? "",
     },
   });
@@ -36,18 +36,22 @@ export default function AuthForm({
       )}
 
       <Controller
-        name="username"
+        name="email"
         control={control}
         rules={{
-          required: "Username must be at least 1 character",
+          required: "Email is required",
+          pattern: {
+            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: "Please enter a valid email address",
+          },
         }}
         render={({ field }) => (
           <GlobalInput
-            label="Username"
-            type="text"
-            placeholder="Enter username"
+            label="Email"
+            type="email"
+            placeholder="Enter email"
             className="h-11 focus:ring-2 focus:ring-app-primary-ring/20"
-            error={errors.username?.message}
+            error={errors.email?.message}
             {...field}
           />
         )}

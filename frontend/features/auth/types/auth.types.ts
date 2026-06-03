@@ -4,7 +4,7 @@ export type AuthTabsProps = {
 };
 
 export type AuthFormValues = {
-  username: string;
+  email: string;
   password: string;
 };
 

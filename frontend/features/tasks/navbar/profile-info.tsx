@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 
 export function ProfileInfo() {
-  const displayName = useAuthStore((state) => state.username || "User");
+  const displayName = useAuthStore((state) => state.email || "User");
   const initial = displayName.charAt(0).toUpperCase();
 
   return (

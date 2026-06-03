@@ -15,7 +15,7 @@ const TASKS_ROUTE = "/tasks";
 export default function AuthPage({ mode }: AuthPageProps) {
   const router = useRouter();
   const {
-    username,
+    email,
     login,
     register,
     isBusy,
@@ -76,7 +76,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
       <AuthForm
         mode={mode}
         onModeChange={handleModeChange}
-        defaultValues={{ username }}
+        defaultValues={{ email }}
         onSubmit={handleSubmit}
         isBusy={isBusy}
         message={message}

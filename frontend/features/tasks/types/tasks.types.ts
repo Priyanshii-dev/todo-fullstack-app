@@ -6,7 +6,7 @@
    task: string;
    is_completed: boolean;
    user_id: number;
-   username: string;
+   email: string;
  };
 
 export type TaskTableParams = {

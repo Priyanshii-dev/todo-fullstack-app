@@ -10,12 +10,12 @@ import { clearTokens, saveTokens } from "../lib/auth";
 import { AuthResponse } from "../types";
 
 type AuthCredentials = {
-  username: string;
+  email: string;
   password: string;
 };
 
 interface AuthState {
-  username: string;
+  email: string;
   password: string;
 
   accessToken: string | null;
@@ -24,7 +24,7 @@ interface AuthState {
   isBusy: boolean;
   message: string;
 
-  setUsername: (value: string) => void;
+  setEmail: (value: string) => void;
   setPassword: (value: string) => void;
   setMessage: (message: string) => void;
 
@@ -40,7 +40,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      username: "",
+      email: "",
       password: "",
       accessToken: null,
       refreshToken: null,
@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
       isBusy: false,
       message: "",
 
-      setUsername: (value) => set({ username: value }),
+      setEmail: (value) => set({ email: value }),
 
       setPassword: (value) => set({ password: value }),
 
@@ -62,7 +62,7 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const payload = credentials ?? {
-            username: get().username,
+            email: get().email,
             password: get().password,
           };
 
@@ -75,14 +75,14 @@ export const useAuthStore = create<AuthState>()(
           );
 
           const tokens = mapTokenPair(response);
-          const actualUsername = response.user?.username ?? payload.username;
+          const actualEmail = response.user?.email ?? payload.email;
           saveTokens(tokens.access, tokens.refresh);
 
           set({
             accessToken: tokens.access,
             refreshToken: tokens.refresh,
             password: "",
-            username: actualUsername,
+            email: actualEmail,
             message: "Login successful",
           });
           toast.success("Login successful");
@@ -113,7 +113,7 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           const payload = credentials ?? {
-            username: get().username,
+            email: get().email,
             password: get().password,
           };
 
@@ -126,13 +126,13 @@ export const useAuthStore = create<AuthState>()(
           );
 
           const tokens = mapTokenPair(response);
-          const actualUsername = response.user?.username ?? payload.username;
+          const actualEmail = response.user?.email ?? payload.email;
           saveTokens(tokens.access, tokens.refresh);
 
           set({
             accessToken: tokens.access,
             refreshToken: tokens.refresh,
-            username: actualUsername,
+            email: actualEmail,
             message: "Registration successful",
             password: "",
           });
@@ -162,7 +162,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           accessToken: null,
           refreshToken: null,
-          username: "",
+          email: "",
           password: "",
 
           message: "Logged out successfully",
@@ -176,7 +176,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           accessToken: null,
           refreshToken: null,
-          username: "",
+          email: "",
           password: "",
           message: "",
         });
@@ -188,22 +188,22 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
-      version: 2,
+      version: 3,
 
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
-        username: state.username,
+        email: state.email,
       }),
       migrate: (persistedState) => {
         const state = persistedState as
-          | (Partial<AuthState> & { loggedInUsername?: string })
+          | (Partial<AuthState> & { username?: string; loggedInUsername?: string })
           | undefined;
 
         return {
           accessToken: state?.accessToken ?? null,
           refreshToken: state?.refreshToken ?? null,
-          username: state?.username ?? state?.loggedInUsername ?? "",
+          email: state?.email ?? state?.username ?? state?.loggedInUsername ?? "",
           password: "",
           isBusy: false,
           message: "",
