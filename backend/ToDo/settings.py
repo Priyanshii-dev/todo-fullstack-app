@@ -69,7 +69,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'ToDo.urls'
-LOGIN_URL = '/login/'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -166,8 +165,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 AUTHENTICATION_BACKENDS = [
-    #"todolist.auth_views.EmailBackend",
-    'accounts.backends.EmailBackend', 
+    "accounts.backends.EmailBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 

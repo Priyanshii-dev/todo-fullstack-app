@@ -1,7 +1,7 @@
 from rest_framework import permissions
 from rest_framework.views import APIView
 
-from todolist.serializers import TaskSerializer
+from todolist.serializers.tasks import TaskSerializer
 from ..responses import get_positive_int, success_response
 from .task_helpers import get_all_tasks_for_user
 

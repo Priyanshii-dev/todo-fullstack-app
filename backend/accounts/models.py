@@ -13,8 +13,11 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra):
-        extra.setdefault('is_staff', True)
-        extra.setdefault('is_superuser', True)
+        extra.setdefault("is_staff", True)
+        extra.setdefault("is_superuser", True)
+        extra.setdefault("role", User.Role.ADMIN)
+        extra.setdefault("status", User.Status.APPROVED)
+
         return self.create_user(email, password, **extra)
 
 
@@ -22,17 +25,31 @@ class User(AbstractUser):
     username = None
     email    = models.EmailField(unique=True)
 
-    USERNAME_FIELD  = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = UserManager()
 
     class Role(models.TextChoices):
-        ADMIN    = 'admin',    'Admin'
-        HR       = 'hr',       'HR'
-        EMPLOYEE = 'employee', 'Employee'
+        ADMIN = "admin", "Admin"
+        EMPLOYEE = "employee", "Employee"
 
-    role = models.CharField(max_length=20, choices=Role.choices, default=Role.EMPLOYEE)
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.EMPLOYEE,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
 
     def __str__(self):
         return self.email

@@ -3,7 +3,7 @@ from rest_framework import permissions
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.views import APIView
 
-from todolist.serializers import TaskSerializer
+from todolist.serializers.tasks import TaskSerializer
 from ..responses import success_response
 from .task_helpers import get_single_task_for_user
 
