@@ -16,7 +16,7 @@ class TaskSearchAPI(APIView):
         if name:
             tasks = tasks.filter(task__icontains=name)
 
-        serializer = TaskSerializer(tasks, many=True)
+        serializer = TaskSerializer(tasks, many=True, context={"request": request})
 
         return success_response(
             data=serializer.data,

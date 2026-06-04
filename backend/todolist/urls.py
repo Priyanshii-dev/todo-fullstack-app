@@ -1,4 +1,6 @@
 from django.urls import path
+from .api.tasks.task_logo import TaskLogo
+from .api.tasks.task_logo_serve import TaskLogoServeAPI
 
 from .api.auth.login import LoginAPI
 from .api.auth.register import RegisterAPI
@@ -132,5 +134,11 @@ urlpatterns = [
         "api/tasks/toggle/<int:task_id>",
         TaskToggleAPI.as_view(),
         name="api_task_toggle"
+    ),
+
+    path(
+        "api/tasks/<int:task_id>/logo/",
+        TaskLogoServeAPI.as_view(),
+        name="api_task_logo_serve"
     ),
 ]

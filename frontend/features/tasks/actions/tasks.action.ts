@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { TaskFormMode, TaskFormValues } from "../TaskForm";
+
 import { useTodoStore } from "@/store/todo-store";
 import { useFetchData } from "@/api/hooks/useFetch";
 
@@ -14,7 +14,7 @@ import usePutData from "@/api/hooks/use-put";
 import useDeleteData from "@/api/hooks/use-delete";
 import instance from "@/api/instance";
 import { taskSchema } from "@/lib/schemas";
-import { Task, TaskTableParams, TaskTableResponse } from "../types/tasks.types";
+import { Task, TaskFormMode, TaskFormValues, TaskTableParams, TaskTableResponse } from "../types/tasks.types";
 import { useAuthStore } from "@/store/auth-store";
 import { toast } from "sonner";
 
@@ -126,7 +126,8 @@ export function useTaskFormAction(mode: TaskFormMode) {
   const fetchedTask = rawTask ? mapTask(rawTask) : null;
 
   //  Create
-  const { mutateAsync: createTask, isPending: isCreating } = usePostData<Task, Partial<Task>>({
+  const { mutateAsync: createTask, isPending: isCreating } =
+  usePostData<Task, FormData>({
     url: API_ENDPOINTS.tasks.create,
     showToast: true,
     onSuccess: async (data) => {
@@ -137,16 +138,19 @@ export function useTaskFormAction(mode: TaskFormMode) {
   });
 
   // Edit 
-  const { mutateAsync: editTask, isPending: isEditing } = usePutData<Partial<Task>, Task>({
-  url: API_ENDPOINTS.tasks.edit(Number(taskId)),
-  mutationOptions: {
-    onSuccess: async (data) => {
-      updateTask(mapTask(data));
-      await queryClient.invalidateQueries({ queryKey: [API_ENDPOINTS.tasks.list] });
-      router.push(TASKS_ROUTE);
+  const { mutateAsync: editTask, isPending: isEditing } =
+  usePutData<FormData, Task>({
+    url: API_ENDPOINTS.tasks.edit(Number(taskId)),
+    mutationOptions: {
+      onSuccess: async (data) => {
+        updateTask(mapTask(data));
+        await queryClient.invalidateQueries({
+          queryKey: [API_ENDPOINTS.tasks.list],
+        });
+        router.push(TASKS_ROUTE);
+      },
     },
-  },
-});
+  });
 
   // Delete
   const { mutateAsync: destroyTask, isPending: isDeleting } = useDeleteData<Task>({
@@ -165,23 +169,40 @@ export function useTaskFormAction(mode: TaskFormMode) {
   async function submitTask(values: TaskFormValues) {
     setMessage("");
 
-    const validation = taskSchema.safeParse({ task: values.task });
+    const validation = taskSchema.safeParse({
+      task: values.task,
+    });
+
     if (!validation.success) {
-      const message = validation.error.issues.map((i) => i.message).join(" ");
+      const message = validation.error.issues
+        .map((i) => i.message)
+        .join(" ");
+
       setMessage(message);
       toast.error(message);
       return;
     }
 
     try {
-      if (mode === "create") {
-        await createTask({ task: validation.data.task, is_completed: values.isCompleted });
+      const formData = new FormData();
+      formData.append("task", validation.data.task);
+      formData.append("is_completed", String(values.isCompleted));
+
+      if (values.logo) {
+        formData.append("logo_upload", values.logo);
       }
-      if (mode === "edit") {
-        await editTask({ payload: { task: validation.data.task, is_completed: values.isCompleted },});
+
+      if (mode === "create") {
+        await createTask(formData);
+      } else {
+        await editTask({ payload: formData });
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : `Unable to ${mode} task.`;
+      const message =
+        error instanceof Error
+          ? error.message
+          : `Unable to ${mode} task.`;
+
       setMessage(message);
       toast.error(message);
     }

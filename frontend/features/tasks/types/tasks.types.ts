@@ -1,13 +1,14 @@
- export type TaskStatusFilter = "all" | "completed" | "pending";
+export type TaskStatusFilter = "all" | "completed" | "pending";
 
- export type Task = {
-   id: number;
-   task_number: number;
-   task: string;
-   is_completed: boolean;
-   user_id: number;
-   email: string;
- };
+export type Task = {
+  id: number;
+  task_number: number;
+  task: string;
+  is_completed: boolean;
+  user_id: number;
+  email: string;
+  logo?: string;
+};
 
 export type TaskTableParams = {
   page: number;
@@ -24,12 +25,6 @@ export type TaskTableResponse = {
   totalPages: number;
   totalTasks: number;
   completedTasks: number;
-};
-
- export type TaskFormProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
 };
 
 export type TaskStatsProps = {
@@ -51,4 +46,25 @@ export type TaskItemProps = {
   task: Task;
   onToggle: () => void;
   onDelete: () => void;
+};
+
+export type TaskFormMode = "create" | "edit" | "delete";
+
+export type TaskFormValues = {
+  task: string;
+  isCompleted: boolean;
+  logo?: File;         
+};
+
+export type TaskFormProps = {
+  mode: TaskFormMode;
+  task: string;
+  isCompleted: boolean;
+  logo?: string;      
+  loading?: boolean;
+  submitting?: boolean;
+  message?: string;
+  onBack: () => void;
+  onSubmit?: (values: TaskFormValues) => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
 };

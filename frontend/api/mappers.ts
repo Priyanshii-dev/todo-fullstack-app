@@ -20,5 +20,6 @@ export function mapTask(payload: Task): Task {
     is_completed: payload.is_completed,
     user_id: payload.user_id,
     email: payload.email ?? "",
+    logo: payload.logo ?? undefined,
   };
 }

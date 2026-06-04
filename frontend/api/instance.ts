@@ -20,20 +20,26 @@ function getErrorMessage(data: ApiErrorPayload | null) {
 
 const instance = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 export async function apiRequest<T>(
   url: string,
   options: RequestInit = {},
 ): Promise<T> {
+  const body = options.body;
+  const isFormData = body instanceof FormData;
+  const hasContentType = !!(options.headers as Record<string, string>)?.["Content-Type"];
+
   const response = await instance.request<T>({
     url,
     method: options.method ?? "GET",
-    data: options.body,
-    headers: options.headers as Record<string, string> | undefined,
+    data: body,
+    headers: {
+      ...(!isFormData && !hasContentType && body != null
+        ? { "Content-Type": "application/json" }
+        : {}),
+      ...(options.headers as Record<string, string> | undefined),
+    },
   });
 
  if (

@@ -18,7 +18,6 @@ const usePostData = <TData = unknown, TVariables = unknown>({
     mutationFn: async (variables: TVariables): Promise<TData> => {
       const finalHeaders: Record<string, string> = {
         ...headers,
-        ...(useFormData ? { "Content-Type": "multipart/form-data" } : {}),
       };
 
       let finalUrl = url;

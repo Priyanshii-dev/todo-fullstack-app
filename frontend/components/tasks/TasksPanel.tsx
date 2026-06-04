@@ -163,6 +163,21 @@ export default function TasksPanel() {
       render: (task) => <span className="font-medium">#{task.task_number}</span>,
     },
     {
+      key: "logo",
+      header: "Logo",
+      className: "w-20",
+      render: (task) =>
+        task.logo ? (
+          <img
+            src={task.logo}
+            alt={`${task.task} logo`}
+            className="size-10 rounded-md object-cover border border-app-border dark:border-app-border-dark"
+          />
+        ) : (
+          <span className="text-xs text-app-muted dark:text-app-muted-dark">—</span>
+        ),
+    },
+    {
       key: "task",
       header: "Name",
       render: (task) => (

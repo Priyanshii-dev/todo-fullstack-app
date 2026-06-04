@@ -11,5 +11,5 @@ class TaskDetailAPI(APIView):
 
     def get(self, request, task_id):
         task = get_single_task_for_user(request.user, task_id)
-        serializer = TaskSerializer(task)
+        serializer = TaskSerializer(task, context={"request": request})
         return success_response(data=serializer.data)

@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from rest_framework.views import APIView
 
+from todolist.serializers import TaskSerializer
 from ..responses import success_response
 from .task_helpers import get_single_task_for_user
 
@@ -13,7 +14,9 @@ class TaskToggleAPI(APIView):
         task.is_completed = not task.is_completed
         task.save(update_fields=["is_completed"])
 
+        serializer = TaskSerializer(task, context={"request": request})
+
         return success_response(
-            data={"is_completed": task.is_completed},
+            data=serializer.data,
             message="Task toggled successfully.",
         )

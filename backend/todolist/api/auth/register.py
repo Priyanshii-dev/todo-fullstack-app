@@ -1,6 +1,7 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework import generics, permissions
-
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from todolist.serializers import RegisterSerializer
 from ..responses import success_response
 from .token import get_tokens_for_user

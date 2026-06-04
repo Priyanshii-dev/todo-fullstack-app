@@ -33,7 +33,7 @@ def get_task_table_response(request, params):
     start = (page - 1) * limit
     end = start + limit
 
-    serializer = TaskSerializer(tasks[start:end], many=True)
+    serializer = TaskSerializer(tasks[start:end], many=True, context={"request": request})
 
     return success_response(
         data={
@@ -57,7 +57,7 @@ class TaskListAPI(APIView):
             return get_task_table_response(request, request.query_params)
 
         tasks = get_all_tasks_for_user(request.user)
-        serializer = TaskSerializer(tasks, many=True)
+        serializer = TaskSerializer(tasks, many=True, context={"request": request})
         return success_response(data=serializer.data)
 
     def post(self, request):

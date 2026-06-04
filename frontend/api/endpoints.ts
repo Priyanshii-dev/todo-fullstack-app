@@ -10,5 +10,6 @@ export const API_ENDPOINTS = {
     edit:   (id: number) => `/api/tasks/edit/${id}`,
     delete: (id: number) => `/api/tasks/delete/${id}`,
     toggle: (id: number) => `/api/tasks/toggle/${id}`,
+    logo:   (id: number) => `/api/tasks/${id}/logo/`,
   },
 } as const;

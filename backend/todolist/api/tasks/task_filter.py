@@ -16,7 +16,7 @@ class TaskStatusFilterAPI(APIView):
         if isinstance(is_completed, bool):
             tasks = tasks.filter(is_completed=is_completed)
 
-        serializer = TaskSerializer(tasks, many=True)
+        serializer = TaskSerializer(tasks, many=True, context={"request": request})
 
         return success_response(
             data=serializer.data,
