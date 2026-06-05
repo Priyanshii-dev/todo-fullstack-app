@@ -4,5 +4,9 @@
   "scripts": {
     "dev": "./todo_env/bin/python manage.py runserver 127.0.0.1:8000",
     "check": "./todo_env/bin/python manage.py check"
+  },
+  "dependencies": {
+    "firebase": "^12.14.0",
+    "firebase-tools": "^15.19.1"
   }
 }

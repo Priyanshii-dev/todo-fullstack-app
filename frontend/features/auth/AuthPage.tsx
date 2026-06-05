@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { authSchema } from "@/lib/schemas";
 import AuthForm from "@/components/auth/AuthForm";
 import { toast } from "sonner";
+import { requestNotificationPermission } from "@/lib/notification";
 
 const LOGIN_ROUTE = "/login";
 const REGISTER_ROUTE = "/register";
@@ -67,8 +68,19 @@ export default function AuthPage({ mode }: AuthPageProps) {
         : await register(validation.data);
 
     if (success) {
-      router.push(TASKS_ROUTE);
-    }
+  try {
+    const fcmToken =
+      await requestNotificationPermission();
+
+    console.log("FCM Token:", fcmToken);
+
+    // Later we'll send this token to Django
+  } catch (error) {
+    console.error(error);
+  }
+
+  router.push(TASKS_ROUTE);
+}
   }
 
   return (

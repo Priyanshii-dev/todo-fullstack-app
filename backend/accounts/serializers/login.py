@@ -27,7 +27,7 @@ class LoginSerializer(serializers.Serializer):
         if not user.is_active:
             raise serializers.ValidationError("This account is deactivated.")
 
-        # ── Status gate ────────────────────────────────────────────────────
+        # ── Status gate
         if user.status == User.Status.PENDING:
             raise serializers.ValidationError("Your account is awaiting admin approval.")
         if user.status == User.Status.REJECTED:

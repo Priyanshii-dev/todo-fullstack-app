@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig = {
   output: "standalone",
+  reactCompiler: true,
   experimental: {
-    reactCompiler: true,
     ppr: false,
   },
   images: {
