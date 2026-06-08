@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from todolist.serializers.tasks import TaskSerializer
 from ..responses import success_response
 from ...utils.task_helpers import get_single_task_for_user
-from django.core.cache import cache
+from todolist.utils.cache import clear_user_tasks_cache
 
 
 class TaskDeleteAPI(APIView):
@@ -18,6 +18,8 @@ class TaskDeleteAPI(APIView):
         data = serializer.data
 
         task.delete()
+
+        clear_user_tasks_cache(request.user.id)
 
         return success_response(
             data=data,

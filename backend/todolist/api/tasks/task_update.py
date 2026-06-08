@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from todolist.serializers.tasks import TaskSerializer
 from ..responses import success_response
 from ...utils.task_helpers import get_single_task_for_user
+from todolist.utils.cache import clear_user_tasks_cache
 
 
 class TaskUpdateAPI(APIView):
@@ -18,6 +19,8 @@ class TaskUpdateAPI(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        clear_user_tasks_cache(request.user.id)
+
         return success_response(
             data=serializer.data,
             message="Task updated successfully.",
@@ -28,6 +31,8 @@ class TaskUpdateAPI(APIView):
         serializer = TaskSerializer(task, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        clear_user_tasks_cache(request.user.id)
 
         return success_response(
             data=serializer.data,

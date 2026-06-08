@@ -54,30 +54,14 @@ class TaskListAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        params = request.query_params
 
-        cache_key = get_user_tasks_cache_key(request.user.id)
-        print("CACHE KEY:", cache_key)
-
+        cache_key = get_user_tasks_cache_key(request.user.id, params)
         cached_data = cache.get(cache_key)
 
         if cached_data:
-            print("FROM REDIS")
-            return success_response(data=cached_data)
+            return success_response(data=cached_data, message="Tasks fetched successfully.")
 
-        print("FROM DATABASE")
-
-        tasks = get_all_tasks_for_user(request.user)
-
-        serializer = TaskSerializer(
-            tasks,
-            many=True,
-            context={"request": request},
-        )
-
-        cache.set(
-            cache_key,
-            serializer.data,
-            timeout=300,
-        )
-
-        return success_response(data=serializer.data)
+        response_data = get_task_table_response(request, params)
+        cache.set(cache_key, response_data.data["data"], timeout=300)
+        return response_data
