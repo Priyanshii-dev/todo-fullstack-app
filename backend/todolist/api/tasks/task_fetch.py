@@ -3,8 +3,9 @@ from rest_framework.views import APIView
 
 from todolist.serializers.tasks import TaskSerializer
 from ..responses import get_positive_int, success_response
-from .task_helpers import get_all_tasks_for_user
-
+from ...utils.task_helpers import get_all_tasks_for_user
+from django.core.cache import cache
+from todolist.utils.cache import get_user_tasks_cache_key
 
 def get_task_table_response(request, params):
     page = get_positive_int(params.get("page"), 1)
@@ -53,12 +54,30 @@ class TaskListAPI(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        if any(key in request.query_params for key in ("page", "limit", "search", "status")):
-            return get_task_table_response(request, request.query_params)
+
+        cache_key = get_user_tasks_cache_key(request.user.id)
+        print("CACHE KEY:", cache_key)
+
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            print("FROM REDIS")
+            return success_response(data=cached_data)
+
+        print("FROM DATABASE")
 
         tasks = get_all_tasks_for_user(request.user)
-        serializer = TaskSerializer(tasks, many=True, context={"request": request})
-        return success_response(data=serializer.data)
 
-    def post(self, request):
-        return get_task_table_response(request, request.data)
+        serializer = TaskSerializer(
+            tasks,
+            many=True,
+            context={"request": request},
+        )
+
+        cache.set(
+            cache_key,
+            serializer.data,
+            timeout=300,
+        )
+
+        return success_response(data=serializer.data)

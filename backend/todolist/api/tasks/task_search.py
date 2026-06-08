@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 
 from todolist.serializers.tasks import TaskSerializer
 from ..responses import success_response
-from .task_helpers import get_all_tasks_for_user
+from ...utils.task_helpers import get_all_tasks_for_user
 
 
 class TaskSearchAPI(APIView):

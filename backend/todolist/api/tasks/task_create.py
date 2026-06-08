@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from todolist.serializers.tasks import TaskSerializer
 from ..responses import success_response
+from todolist.utils.cache import clear_user_tasks_cache
 
 
 class TaskCreateAPI(APIView):
@@ -18,6 +19,9 @@ class TaskCreateAPI(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
+
+        # Clear Redis cache
+        clear_user_tasks_cache(request.user.id)
 
         return success_response(
             data=serializer.data,
