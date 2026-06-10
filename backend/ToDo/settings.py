@@ -45,12 +45,14 @@ CORS_ALLOWED_ORIGINS = [
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),  # ← env-driven
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
+OTP_EXPIRY_SECONDS = 600   # 10 minutes
+OTP_MAX_ATTEMPTS   = 5     # brute-force guard
 # Application definition
 
 INSTALLED_APPS = [ 
@@ -104,6 +106,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
 
     ),
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "5/minute",
+    },
 }
 
 SIMPLE_JWT = {
@@ -174,7 +182,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 AUTHENTICATION_BACKENDS = [
-    "accounts.backends.EmailBackend",
+    "accounts.email.EmailBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 

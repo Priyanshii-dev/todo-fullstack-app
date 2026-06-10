@@ -12,6 +12,7 @@ import { requestNotificationPermission } from "@/lib/notification";
 const LOGIN_ROUTE = "/login";
 const REGISTER_ROUTE = "/register";
 const TASKS_ROUTE = "/tasks";
+const VERIFY_OTP_ROUTE = "/verify-otp";
 
 export default function AuthPage({ mode }: AuthPageProps) {
   const router = useRouter();
@@ -68,19 +69,24 @@ export default function AuthPage({ mode }: AuthPageProps) {
         : await register(validation.data);
 
     if (success) {
-  try {
-    const fcmToken =
-      await requestNotificationPermission();
+      if (mode === "register") {
+        router.push(`${VERIFY_OTP_ROUTE}?email=${encodeURIComponent(validation.data.email)}`);
+        return;
+      }
 
-    console.log("FCM Token:", fcmToken);
+      try {
+        const fcmToken =
+          await requestNotificationPermission();
 
-    // Later we'll send this token to Django
-  } catch (error) {
-    console.error(error);
-  }
+        console.log("FCM Token:", fcmToken);
 
-  router.push(TASKS_ROUTE);
-}
+        // Later we'll send this token to Django
+      } catch (error) {
+        console.error(error);
+      }
+
+      router.push(TASKS_ROUTE);
+    }
   }
 
   return (

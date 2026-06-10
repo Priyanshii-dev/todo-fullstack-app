@@ -30,6 +30,8 @@ interface AuthState {
 
   login: (credentials?: AuthCredentials) => Promise<boolean>;
   register: (credentials?: AuthCredentials) => Promise<boolean>;
+  verifyOtp: (email: string, code: string) => Promise<boolean>;
+  resendOtp: (email: string) => Promise<boolean>;
 
   logout: () => void;
   clearAuth: () => void;
@@ -117,7 +119,7 @@ export const useAuthStore = create<AuthState>()(
             password: get().password,
           };
 
-          const response = await request<AuthResponse>(
+          await request<null>(
             API_ENDPOINTS.auth.register,
             {
               method: "POST",
@@ -125,18 +127,12 @@ export const useAuthStore = create<AuthState>()(
             },
           );
 
-          const tokens = mapTokenPair(response);
-          const actualEmail = response.user?.email ?? payload.email;
-          saveTokens(tokens.access, tokens.refresh);
-
           set({
-            accessToken: tokens.access,
-            refreshToken: tokens.refresh,
-            email: actualEmail,
-            message: "Registration successful",
+            email: payload.email,
+            message: "Registration successful. Please check your email for the OTP.",
             password: "",
           });
-          toast.success("Registration successful");
+          toast.success("Registration successful! Check your email for the verification code.");
 
           return true;
         } catch (error) {
@@ -148,6 +144,68 @@ export const useAuthStore = create<AuthState>()(
           set({
             message,
           });
+          toast.error(message);
+
+          return false;
+        } finally {
+          set({ isBusy: false });
+        }
+      },
+
+      verifyOtp: async (email, code) => {
+        set({ isBusy: true, message: "" });
+
+        try {
+          await request<null>(
+            API_ENDPOINTS.auth.verifyOtp,
+            {
+              method: "POST",
+              body: JSON.stringify({ email, code }),
+            },
+          );
+
+          set({ message: "Email verified successfully." });
+          toast.success("Email verified! You can now log in.");
+
+          return true;
+        } catch (error) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Unable to verify OTP";
+
+          set({ message });
+          toast.error(message);
+
+          return false;
+        } finally {
+          set({ isBusy: false });
+        }
+      },
+
+      resendOtp: async (email) => {
+        set({ isBusy: true, message: "" });
+
+        try {
+          await request<null>(
+            API_ENDPOINTS.auth.resendOtp,
+            {
+              method: "POST",
+              body: JSON.stringify({ email }),
+            },
+          );
+
+          set({ message: "A new OTP has been sent to your email." });
+          toast.success("New OTP sent! Check your email.");
+
+          return true;
+        } catch (error) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Unable to resend OTP";
+
+          set({ message });
           toast.error(message);
 
           return false;

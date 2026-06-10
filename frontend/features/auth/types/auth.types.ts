@@ -29,3 +29,17 @@ export type AuthMode = "login" | "register";
 export type AuthPageProps = {
   mode: AuthMode;
 };
+
+
+export type OtpFormValues = {
+  code: string;
+};
+
+export type OtpFormProps = {
+  email: string;
+  onSubmit: (values: OtpFormValues) => void | Promise<void>;
+  onResend: () => void | Promise<void>;
+  onBack: () => void;
+  isBusy: boolean;
+  message: string;
+};

@@ -15,8 +15,10 @@ class UserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra):
         extra.setdefault("is_staff", True)
         extra.setdefault("is_superuser", True)
-        extra.setdefault("role", User.Role.ADMIN)
-        extra.setdefault("status", User.Status.APPROVED)
+        # extra.setdefault("role", User.Role.ADMIN)
+        # extra.setdefault("status", User.Status.APPROVED)
+        extra.setdefault("role", "admin")       # ← use string literals
+        extra.setdefault("status", "approved")
 
         return self.create_user(email, password, **extra)
 
@@ -50,6 +52,7 @@ class User(AbstractUser):
         choices=Status.choices,
         default=Status.PENDING,
     )
+    is_email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return self.email

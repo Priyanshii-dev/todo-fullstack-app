@@ -26,13 +26,14 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Incorrect password.")
         if not user.is_active:
             raise serializers.ValidationError("This account is deactivated.")
+        if not user.is_email_verified:
+            raise serializers.ValidationError("Please verify your email before logging in.")
 
         # ── Status gate
         if user.status == User.Status.PENDING:
             raise serializers.ValidationError("Your account is awaiting admin approval.")
         if user.status == User.Status.REJECTED:
             raise serializers.ValidationError("Your account has been rejected. Contact support.")
-        # ──────────────────────────────────────────────────────────────────
 
         attrs["user"] = user
         return attrs

@@ -8,6 +8,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from accounts.utils.otp import send_otp
 
 User = get_user_model()
 
@@ -34,10 +35,18 @@ def _send_email(subject, html_message, recipient_email):
 
 @receiver(post_save, sender=User)
 def user_registered(sender, instance, created, **kwargs):
-    """Signal fired after a new user registers — sends a welcome email."""
+    """Signal fired after a new user registers — sends welcome email + OTP."""
     if created:
         logger.info("New user registered: %s", instance.email)
 
+        # Send OTP for email verification
+        try:
+            send_otp(instance)
+            logger.info("OTP sent to %s", instance.email)
+        except Exception as e:
+            logger.error("Failed to send OTP to %s: %s", instance.email, e)
+
+        # Send welcome email in background thread
         context = {
             "email": instance.email,
             "login_url": getattr(settings, "FRONTEND_URL", "http://localhost:3000") + "/login",
